@@ -25,7 +25,7 @@ public class Observation implements Comparable<Observation> {
 	public String result;
 	public String obsVal;
 	
-	public ArrayList<String> derivedFrom;
+	public ArrayList<String> derivedFrom = new ArrayList<String>();
 	
 	public final String SSN = "http://purl.oclc.org/NET/ssnx/ssn#";
 	public final String RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";

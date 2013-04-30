@@ -16,39 +16,39 @@ public class LineParser {
 		try
 		{
 			
-			//String date = obs[18];
-			String date = obs[0];
-			String time = obs[1];
+			String date = obs[18];
+			//String date = obs[0];
+			//String time = obs[1];
 			//String timeM = obs[2];
-			//String avgX = (obs[3].equals("") ? "0" : obs[3]);
-			String avgX = (obs[5].equals("") ? "0" : obs[5]);
-			//String avgY = (obs[8].equals("") ? "0" : obs[6]);
-			String avgY = (obs[8].equals("") ? "0" : obs[8]);
-			//String avgZ = (obs[9].equals("") ? "0" : obs[9]);
-			String avgZ = (obs[11].equals("") ? "0" : obs[11]);
-			//String hum = (obs[10].equals("") ? "0" : obs[10]);
-			String hum = (obs[12].equals("") ? "0" : obs[12]);
-			//String temp = (obs[11].equals("") ? "0" : obs[11]);
-			String temp = (obs[13].equals("") ? "0" : obs[13]);
-			//String lat = (obs[12].equals("") ? "0" : obs[12]);
-			String lat = (obs[14].equals("") ? "0" : obs[14]);
-			//String lon = (obs[13].equals("") ? "0" : obs[13]);
-			String lon = (obs[15].equals("") ? "0" : obs[15]);
-			//String alt = (obs[14].equals("") ? "0" : obs[14]);
-			String alt = (obs[16].equals("") ? "0" : obs[16]);
-			//String speed = (obs[15].equals("") ? "0" : obs[15]);
-			String speed = (obs[17].equals("") ? "0" : obs[17]);
-			//String sat = (obs[16].equals("") ? "0" : obs[16]);
-			String sat = (obs[18].equals("") ? "0" : obs[18]);
-			//String prec = (obs[17].equals("") ? "0" : obs[17]);
-			String prec = (obs[19].equals("") ? "0" : obs[19]);
-			String event = (obs[20].equals("") ? "0" : obs[20]);
-			//String event = "Coastal walk";
+			String avgX = (obs[3].equals("") ? "0" : obs[3]);
+			//String avgX = (obs[5].equals("") ? "0" : obs[5]);
+			String avgY = (obs[8].equals("") ? "0" : obs[6]);
+			//String avgY = (obs[8].equals("") ? "0" : obs[8]);
+			String avgZ = (obs[9].equals("") ? "0" : obs[9]);
+			//String avgZ = (obs[11].equals("") ? "0" : obs[11]);
+			String hum = (obs[10].equals("") ? "0" : obs[10]);
+			//String hum = (obs[12].equals("") ? "0" : obs[12]);
+			String temp = (obs[11].equals("") ? "0" : obs[11]);
+			//String temp = (obs[13].equals("") ? "0" : obs[13]);
+			String lat = (obs[12].equals("") ? "0" : obs[12]);
+			//String lat = (obs[14].equals("") ? "0" : obs[14]);
+			String lon = (obs[13].equals("") ? "0" : obs[13]);
+			//String lon = (obs[15].equals("") ? "0" : obs[15]);
+			String alt = (obs[14].equals("") ? "0" : obs[14]);
+			//String alt = (obs[16].equals("") ? "0" : obs[16]);
+			String speed = (obs[15].equals("") ? "0" : obs[15]);
+			//String speed = (obs[17].equals("") ? "0" : obs[17]);
+			String sat = (obs[16].equals("") ? "0" : obs[16]);
+			//String sat = (obs[18].equals("") ? "0" : obs[18]);
+			String prec = (obs[17].equals("") ? "0" : obs[17]);
+			//String prec = (obs[19].equals("") ? "0" : obs[19]);
+			//String event = (obs[20].equals("") ? "0" : obs[20]);
+			String event = "Weather station";
 			
-			time = date.trim() + " " + time.trim();
-			//String time = date.trim();
+			//time = date.trim() + " " + time.trim();
+			String time = date.trim();
 			
-			if(count == 4)
+			if(count == 10)
 			{
 				if(!time.equals(" ") && !time.contains("#VALUE"))
 				{

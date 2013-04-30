@@ -1,14 +1,13 @@
 package uk.ac.dotrural.quality.edsensor;
 
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
+
+import java.io.FileReader;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-
 import uk.ac.dotrural.quality.edsensor.assessment.AnnotationParser;
+import uk.ac.dotrural.quality.edsensor.mysql.MySQL;
 import uk.ac.dotrural.quality.edsensor.observation.AccelerometerObservation;
 import uk.ac.dotrural.quality.edsensor.observation.AltitudeObservation;
 import uk.ac.dotrural.quality.edsensor.observation.GPSObservation;
@@ -31,11 +30,20 @@ public class EdSensorAssessor {
 	private final boolean qualityProvenance = false; 
 	private final boolean doLogging = true;
 	
-	private final String NS = "http://dtp-126.sncs.abdn.ac.uk/quality/SensorBox/";
-	
 	private long applicationTime, inferredTriples, assessedTriples, assessedDimensions;
 	
-	private String endpoint = "http://dtp-126.sncs.abdn.ac.uk:8080/openrdf-sesame/repositories/CarWalkTrain";
+	public String file = "CityWalk";
+	public String filename = file + ".csv";
+	public String filepath = "resource/" + filename;
+	
+	private final String NS = "http://dtp-126.sncs.abdn.ac.uk/quality/SensorBox/";
+	
+	public String storename = "http://dtp-126.sncs.abdn.ac.uk:8080/openrdf-sesame/repositories/" + file;
+	public String endpoint = storename.concat("/statements");
+	
+	private String dbUrl;
+	private String dbUser;
+	private String dbPass;
 
 	private String[] props = {
 			"Temperature",
@@ -65,8 +73,10 @@ public class EdSensorAssessor {
 	}
 	
 	public EdSensorAssessor()
-	{
-		ArrayList<Observation> observations = getObservations();
+	{	
+		getUserDetails();
+		
+		ArrayList<Observation> observations = getObservations(storename);
 		
 		for(int i=0;i<observations.size();i++)
 		{
@@ -99,7 +109,31 @@ public class EdSensorAssessor {
 		System.out.println("No. of observations: " + observations.size());
 	}
 	
-	public ArrayList<Observation> getObservations()
+	private void getUserDetails()
+	{
+		try
+		{
+			String read;
+			BufferedReader br = new BufferedReader(new FileReader("config/db.cfg"));
+			while((read = br.readLine()) != null)
+			{
+				String[] tokens = read.split("=");
+				if(tokens[0].equals("url"))
+					dbUrl = tokens[1].concat(file);
+				else if(tokens[0].equals("user"))
+					dbUser = tokens[1];
+				else if(tokens[0].equals("password"))
+					dbPass = tokens[1];
+			}
+			br.close();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+	
+	public ArrayList<Observation> getObservations(String endpoint)
 	{		
 		System.out.println("[Getting observations]");
 		ArrayList<Observation> observations = new ArrayList<Observation>();				   
@@ -213,7 +247,7 @@ public class EdSensorAssessor {
 											event.getLexicalForm()
 										 );
 						
-						observations.add(obs);	
+						observations.add(obs);
 						
 						break;
 					}
@@ -229,48 +263,40 @@ public class EdSensorAssessor {
 	
 	private void logToDatabase(ReasonerResult results, int used_obs_metadata, int used_obs_prov, int used_qual_prov, String observationUri)
 	{
-		//String url = 	"http://dtp-126.sncs.abdn.ac.uk/MySQLBridge.php?" +
-		String url = "http://dtp-126.sncs.abdn.ac.uk:8080/CarWalkTrainBridge/MySQLBridge?db=carwalktrain_logs" + 
-						"&at=" + applicationTime +
-						"&rt=" + results.duration +
-						"&ms=" + assessedTriples +
-						"&it=" + inferredTriples +
-						"&ad=" + assessedDimensions +
-						"&uom=" + used_obs_metadata +
-						"&uop=" + used_obs_prov + 
-						"&uqp=" + used_qual_prov +
-						"&ou=" + observationUri;
+		MySQL database = new MySQL(dbUrl, dbUser, dbPass);
 		
-		System.out.println(url);
+		PreparedStatement stmt = null;
 		
-		StringBuilder in = new StringBuilder();
-		String tmp = "";
-		try
-		{
-			InputStreamReader input = new InputStreamReader(new URL(url).openStream());
-			BufferedReader br = new BufferedReader(input);
-			while((tmp = br.readLine()) != null)
-			{
-				in.append(tmp);
-			}	
-			input.close();
-			br.close();
+		try{
+			stmt = database.getConnection().prepareStatement("INSERT INTO logs (assessment_time, " +
+					   "							reasoning_time, " +
+					   "							model_size, " +
+					   "							inferred_triples, " +
+				       "							assessed_dimensions, " +
+					   "							used_obs_metadata, " +
+					   "							used_obs_prov, " +
+					   "							used_qual_prov, " +
+					   "							observation_uri)" +
+					   " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+			
+			stmt.setLong(1,  applicationTime);
+			stmt.setLong(2,  results.duration);
+			stmt.setLong(3, assessedTriples);
+			stmt.setLong(4, inferredTriples);
+			stmt.setLong(5, assessedDimensions);
+			stmt.setInt(6, used_obs_metadata);
+			stmt.setInt(7, used_obs_prov);
+			stmt.setInt(8, used_qual_prov);
+			stmt.setString(9, observationUri);
+			
+			if(database.doMySQLInsert(stmt))
+				System.out.println("DB: Row inserted");
+			System.out.println("DB: Failed to insert row");
 		}
 		catch(Exception ex)
 		{
 			ex.printStackTrace();
 		}
-		
-		//Parse response
-		JSONObject response = (JSONObject)JSONSerializer.toJSON(in.toString());
-		String result = response.getString("result");
-		String reason = response.getString("reason");
-		
-		if(result.equalsIgnoreCase("success"))
-			System.out.println("Log entry created successfully!");
-		else
-			System.out.println("Logging failed: " + reason);
-		
 	}
 
 }

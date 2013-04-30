@@ -9,7 +9,7 @@ import uk.ac.dotrural.quality.edsensor.sparql.Updater;
 
 public class EdSensor {
 	
-	public String file = "DalekMarch";
+	public String file = "WeatherStation";
 	public String filename = file + ".csv";
 	public String filepath = "resource/" + filename;
 	
@@ -45,13 +45,15 @@ public class EdSensor {
 	{
 		System.out.println("Starting");
 		System.out.println("===================");
-		System.out.println("== Parsing File ===");
+		System.out.println("== Parsing File: " + filename);
 
 		observations = parseLogFile();
 		
-		System.out.println("=== File parsed ===");
+		System.out.println("=== File parsed");
 		
-		System.out.println("=== Storing Obs ===");
+		System.out.println("=== Observations parsed: " + observations.size());
+		
+		System.out.println("=== Storing Obs");
 		storeObservations(observations);
 		
 		System.out.println("===================");
@@ -99,6 +101,7 @@ public class EdSensor {
 					{
 						GPSObservation gps = (GPSObservation)obs;
 						query = gps.getModel(NS);
+						sendLocation = false;
 					}
 					break;
 				case ALTITUDE:
@@ -106,7 +109,8 @@ public class EdSensor {
 					query = alt.getModel(NS);
 					break;
 				default:
-					query = obs.getModel(NS);
+					if(obs != null)
+						query = obs.getModel(NS);
 					break;
 				}
 				if(query.length() > 0)

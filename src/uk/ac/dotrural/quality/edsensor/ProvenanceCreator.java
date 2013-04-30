@@ -24,7 +24,7 @@ public class ProvenanceCreator {
 	public ProvenanceCreator()
 	{
 		EdSensorAssessor esa = new EdSensorAssessor(storename);
-		ArrayList<Observation> obs = esa.getObservations();
+		ArrayList<Observation> obs = esa.getObservations(storename);
 		System.out.println(obs.size());
 		fixErrors(obs);
 		
