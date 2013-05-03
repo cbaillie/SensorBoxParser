@@ -9,7 +9,7 @@ import uk.ac.dotrural.quality.edsensor.sparql.Updater;
 
 public class EdSensor {
 	
-	public String file = "WeatherStation";
+	public String file = "CityWalk";
 	public String filename = file + ".csv";
 	public String filepath = "resource/" + filename;
 	

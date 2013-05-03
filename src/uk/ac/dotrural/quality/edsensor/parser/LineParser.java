@@ -59,7 +59,7 @@ public class LineParser {
 					observations.add(new Observation(ObservationType.TEMPERATURE, time, temp, event));
 					observations.add(new GPSObservation(ObservationType.GPS, time, lat, lon, sat, prec, event));
 					observations.add(new AltitudeObservation(ObservationType.ALTITUDE, time, alt, sat, event));
-					observations.add(new SpeedObservation(ObservationType.SPEED, time, speed, event));
+					observations.add(new Observation(ObservationType.SPEED, time, speed, event));
 				}
 				count = 0;
 			}

@@ -10,11 +10,13 @@ public class ProvenanceCreator {
 	
 	private ArrayList<Observation> provenance = new ArrayList<Observation>();
 	
-	private String file = "TrainJourney";
+	private String file = "WeatherStation";
 	
-	//private final String NS = "http://dtp-126.sncs.abdn.ac.uk/quality/SensorBox/";
+	public String filename = file +".csv";
+	public String filepath = "resource/" + filename;
 	
-	private final String storename = "http://dtp-126.sncs.abdn.ac.uk:8080/openrdf-sesame/repositories/" + file;
+	public String storename = "http://dtp-126.sncs.abdn.ac.uk:8080/openrdf-sesame/repositories/" + file;
+	public String endpoint = storename.concat("/statements");
 	
 	public static void main(String[] args)
 	{
@@ -25,7 +27,6 @@ public class ProvenanceCreator {
 	{
 		EdSensorAssessor esa = new EdSensorAssessor(storename);
 		ArrayList<Observation> obs = esa.getObservations(storename);
-		System.out.println(obs.size());
 		fixErrors(obs);
 		
 		EdSensor es = new EdSensor(file.concat("Provenance"), provenance);

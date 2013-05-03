@@ -3,6 +3,8 @@ package uk.ac.dotrural.quality.edsensor.observation;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import uk.ac.dotrural.quality.edsensor.agent.AgentFactory;
+
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -21,6 +23,12 @@ public class AltitudeObservation extends Observation {
 	public AltitudeObservation(String id, ObservationType property, String foi, String obsBy, String result, String obsVal, String value, String satellites, String rTime, String sTime, String event)
 	{
 		super(id, property, foi, obsBy, result, obsVal, value, rTime, sTime, event);
+		this.satellites = satellites;
+	}
+	
+	public AltitudeObservation(String id, ObservationType property, String foi, String obsBy, String result, String obsVal, String value, String satellites, String rTime, String sTime, String event, ArrayList<String> derived)
+	{
+		super(id, property, foi, obsBy, result, obsVal, value, rTime, sTime, event, derived);
 		this.satellites = satellites;
 	}
 	
@@ -73,12 +81,23 @@ public class AltitudeObservation extends Observation {
 		sb.append("\t<" + observationValueUri + "> <http://purl.oclc.org/NET/ssnx/ssn#hasValue> " + super.value + " . \n");
 		sb.append("\t<" + observationValueUri + "> <" + NS + "satellites> \"" + satellites + "\" . \n");
 		
+		//Averaging Activity
+		String avgUri = NS + "Activity/" + UUID.randomUUID();
+		sb.append("<" + avgUri + "> a <http://www.w3.org/ns/prov-o/Activity> . \n");
+		sb.append("<" + observationUri + "> <http://www.w3.org/ns/prov-o/wasGeneratedBy> <" + avgUri + "> . \n");
+		
+		//Activity Agent
+		String agentUri = NS + "Agent/" + AgentFactory.getAgent();
+		sb.append("<" + agentUri + "> a <http://www.w3.org/ns/prov-o/Agent> . \n");
+		sb.append("<" + avgUri + "> <http://www.w3.org/ns/prov-o/wasAssociatedWith> <" + agentUri + "> . \n");
+		
 		if(derivedFrom.size() > 0)
 		{
 			for(int i=0;i<derivedFrom.size();i++)
 			{
 				String df = (String)derivedFrom.get(i);
 				sb.append("\t<" + observationUri + "> <http://www.w3.org/ns/prov-o/wasDerivedFrom> <" + df + "> . \n");
+				sb.append("\t<" + avgUri + "> <http://www.w3.org/ns/prov-o/used> <" + df + "> . \n");
 			}
 		}
 		
@@ -133,6 +152,36 @@ public class AltitudeObservation extends Observation {
 		Statement observationValueTypeStmt = sensorObservationModel.createStatement(observationValue, sensorObservationModel.createProperty(RDF, "type"), sensorObservationModel.createResource(SSN + "ObservationValue"));
 		Statement observationValueValueStmt = sensorObservationModel.createStatement(observationValue, sensorObservationModel.createProperty(SSN, "hasValue"), sensorObservationModel.createTypedLiteral(super.value));
 		Statement observationValueSatelliteStmt = sensorObservationModel.createStatement(observationValue, sensorObservationModel.createProperty(NS, "Satellites"), sensorObservationModel.createTypedLiteral(this.satellites));
+		
+		//Averaging Activity
+		String avgUri = NS + "Activity/" + UUID.randomUUID();
+		Resource avgRes = sensorObservationModel.createResource(avgUri);
+		Statement avgTypeStmt = sensorObservationModel.createStatement(avgRes, sensorObservationModel.createProperty(RDF, "type"), sensorObservationModel.createResource(PROV + "Activity"));
+		Statement obsGenStmt = sensorObservationModel.createStatement(observationResource, sensorObservationModel.createProperty(PROV, "wasGeneratedBy"), avgRes);
+		
+		//Activity Agent
+		String agentUri = NS + "Agent/" + AgentFactory.getAgent();
+		Resource agentRes = sensorObservationModel.createResource(agentUri);
+		Statement agtCntActStmt = sensorObservationModel.createStatement(avgRes, sensorObservationModel.createProperty(PROV, "wasAssociatedWith"), agentRes);
+		Statement agtTypeStmt = sensorObservationModel.createStatement(agentRes, sensorObservationModel.createProperty(RDF, "type"), sensorObservationModel.createResource(PROV + "Agent"));
+		
+		sensorObservationModel.add(avgTypeStmt);
+		sensorObservationModel.add(obsGenStmt);
+		sensorObservationModel.add(agtCntActStmt);
+		sensorObservationModel.add(agtTypeStmt);
+		
+		if(derivedFrom.size() > 0)
+		{
+			for(int i=0;i<derivedFrom.size();i++)
+			{
+				String obs = derivedFrom.get(i);
+				Resource dObs = sensorObservationModel.createResource(obs);
+				Statement obsDerFromStmt = sensorObservationModel.createStatement(observationResource, sensorObservationModel.createProperty(PROV, "wasDerivedFrom"), dObs);
+				Statement actUsedDobsStmt = sensorObservationModel.createStatement(avgRes, sensorObservationModel.createProperty(PROV, "used"), dObs);
+				sensorObservationModel.add(obsDerFromStmt);
+				sensorObservationModel.add(actUsedDobsStmt);
+			}
+		}
 		
 		sensorObservationModel.add(observationTypeStmt);
 		sensorObservationModel.add(observationResultStmt);
