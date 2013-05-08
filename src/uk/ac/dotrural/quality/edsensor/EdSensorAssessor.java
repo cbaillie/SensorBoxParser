@@ -60,7 +60,7 @@ public class EdSensorAssessor {
 	public static void main(String[] args) {
 		if(args.length == 0)
 			//System.out.println("Arguments: dataset name, use provenance true/false");
-			new EdSensorAssessor("CityWalk", "true");
+			new EdSensorAssessor("CarCommuter", "true");
 		else {
 			new EdSensorAssessor(args[0], args[1]);	
 		}
@@ -87,7 +87,9 @@ public class EdSensorAssessor {
 		ArrayList<OntModel> models = new ArrayList<OntModel>();
 		ArrayList<Observation> obs = getSSN();
 		
-		for(int i=0;i<obs.size();i++)
+		System.out.println("Adding SSN observations to arraylist");
+		//for(int i=0;i<obs.size();i++)
+		for(int i=0;i<1000;i++)
 		{
 			Observation o = (Observation)obs.get(i);
 			switch(o.property)
@@ -108,14 +110,18 @@ public class EdSensorAssessor {
 				models.add(o.getRdfModel(NS));
 				break;
 			}
+			System.out.println(i+1 + ". Added " + o.id + " to collection");
 		}
 		
+		System.out.println("Adding all derived observations to arraylist");
 		models.addAll(getDerivedObservations());
 		
+		System.out.println("Assess observation quality");
+		//for(int i=0;i<models.size();i++)
 		for(int i=0;i<models.size();i++)
 		{
 			OntModel m = (OntModel)models.get(i);
-			assess(m, m.size());
+			assess("No uri...", m, m.size());
 			m.close();
 			System.out.println(i + " of " + models.size() + " complete.");
 		}
@@ -128,10 +134,12 @@ public class EdSensorAssessor {
 	
 	private ArrayList<OntModel> getDerivedObservations()
 	{
+		int count = 0;
 		ArrayList<Observation> observations = getObservations(storename.concat("Provenance"));
 		ArrayList<OntModel> derivedObs = new ArrayList<OntModel>();
 		for(int i=0;i<observations.size();i++)
 		{
+			count++;
 			OntModel assessment = ModelFactory.createOntologyModel();
 			Observation obs = observations.get(i);	
 			assessment.add(obs.getRdfModel(NS));
@@ -218,13 +226,21 @@ public class EdSensorAssessor {
 				}
 				break;
 			}
+			System.out.println(i+1 + ". Added " + obs.id + " to arraylist");
 			derivedObs.add(assessment);
+			
+			if(count == 27)
+			{
+				System.out.println("All derived observations downloaded");
+				return derivedObs;
+			}
 		}
 		return derivedObs;
 	}
 	
-	private void assess(OntModel obs, long sz)
+	private void assess(String uri, OntModel obs, long sz)
 	{
+		System.out.println("Assessing " + uri);
 		inferredTriples = 0;
 		long start = 0, finish = 0, reasoningTime = 0;
 		start = System.currentTimeMillis();
@@ -393,6 +409,7 @@ public class EdSensorAssessor {
 		sb.append("}");
 
 		sb.append("}");
+		sb.append("LIMIT 200");
 		
 		return sb.toString();
 	}
@@ -407,6 +424,7 @@ public class EdSensorAssessor {
 		{
 			ObservationType property = properties[i];
 			String query = buildQuery("?obs", property);
+			System.out.println(query);
 
 			try {
 				QueryExecution qe = QueryExecutionFactory.sparqlService(endpoint, query);
@@ -430,6 +448,7 @@ public class EdSensorAssessor {
 					Literal sats;
 					
 					ArrayList<String> df = getDerivedObservations(observation.getURI());
+					//System.out.println("\tGot observation: " + observation.getURI());
 					
 					switch(ObservationType.strToObsType(prop))
 					{
@@ -542,6 +561,7 @@ public class EdSensorAssessor {
 				ex.printStackTrace();
 			}
 		}
+		System.out.println("All observations downloaded...");
 		return observations;	
 	}
 	

@@ -10,7 +10,7 @@ public class ProvenanceCreator {
 	
 	private ArrayList<Observation> provenance = new ArrayList<Observation>();
 	
-	private String file = "WeatherStation";
+	private String file = "CityWalk";
 	
 	public String filename = file +".csv";
 	public String filepath = "resource/" + filename;

@@ -14,8 +14,8 @@ public class Updater {
 		UpdateRequest request = UpdateFactory.create();
 		request.add(query);
 		
-		UpdateProcessor update = UpdateExecutionFactory.createRemoteForm(request, endpoint);
-		update.execute();
+		//UpdateProcessor update = UpdateExecutionFactory.createRemoteForm(request, endpoint);
+		//update.execute();
 		
 		edsensor.status();
 	}
