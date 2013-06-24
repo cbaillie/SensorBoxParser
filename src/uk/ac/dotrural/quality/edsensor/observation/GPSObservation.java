@@ -37,8 +37,6 @@ public class GPSObservation extends Observation {
 		lon = (lo.length() > 0 ? lo : "0");
 		sat = (s.length() > 0 ? s : "0");
 		prec = (p.length() > 0 ? p : "0");
-		
-		//System.out.println("Created GPS obs with prec " + p);
 	}
 	
 	public String getObservationValue(String value)
@@ -167,6 +165,11 @@ public class GPSObservation extends Observation {
 		sensorObservationModel.add(observationValueLonStmt);
 		sensorObservationModel.add(observationValueSatStmt);
 		sensorObservationModel.add(observationValuePrecStmt);
+		
+		//Set NS Prefixes
+		sensorObservationModel.setNsPrefix("ssn", "http://purl.oclc.org/NET/ssnx/ssn#");
+		sensorObservationModel.setNsPrefix("dtp", "http://dtp-126.sncs.abdn.ac.uk/quality/SensorBox/");
+		sensorObservationModel.setNsPrefix("prov", "http://www.w3.org/ns/prov-o/");
 		
 		return sensorObservationModel;
 	}

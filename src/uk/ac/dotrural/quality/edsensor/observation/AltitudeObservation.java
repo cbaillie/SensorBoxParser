@@ -200,6 +200,11 @@ public class AltitudeObservation extends Observation {
 		sensorObservationModel.add(observationValueValueStmt);
 		sensorObservationModel.add(observationValueSatelliteStmt);
 		
+		//Set NS Prefixes
+		sensorObservationModel.setNsPrefix("ssn", "http://purl.oclc.org/NET/ssnx/ssn#");
+		sensorObservationModel.setNsPrefix("dtp", "http://dtp-126.sncs.abdn.ac.uk/quality/SensorBox/");
+		sensorObservationModel.setNsPrefix("prov", "http://www.w3.org/ns/prov-o/");
+		
 		return sensorObservationModel;
 	}
 

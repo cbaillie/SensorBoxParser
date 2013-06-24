@@ -87,9 +87,11 @@ public class EdSensorAssessor {
 		ArrayList<OntModel> models = new ArrayList<OntModel>();
 		ArrayList<Observation> obs = getSSN();
 		
+		ArrayList<OntModel> dMods = getDerivedObservations();
+		
 		System.out.println("Adding SSN observations to arraylist");
 		//for(int i=0;i<obs.size();i++)
-		for(int i=0;i<1000;i++)
+		for(int i=0;i<(1000-dMods.size());i++)
 		{
 			Observation o = (Observation)obs.get(i);
 			switch(o.property)
@@ -121,9 +123,9 @@ public class EdSensorAssessor {
 		for(int i=0;i<models.size();i++)
 		{
 			OntModel m = (OntModel)models.get(i);
-			assess("No uri...", m, m.size());
+			this.assess("N/a", m, m.size());
 			m.close();
-			System.out.println(i + " of " + models.size() + " complete.");
+			System.out.println(i+1 + " of " + models.size() + " complete.");
 		}
 	}
 	
@@ -157,7 +159,8 @@ public class EdSensorAssessor {
 						QuerySolution qs = rs.next();
 						
 						Resource foi = qs.getResource("foi");
-						String prop = props[i];
+						//String prop = ObservationType.lookup(obs.property);
+						ObservationType prop = obs.property;
 						Resource sens = qs.getResource("sens");
 						Literal rTime = qs.getLiteral("rTime");
 						Literal event = qs.getLiteral("event");
@@ -172,7 +175,7 @@ public class EdSensorAssessor {
 				
 						AltitudeObservation alObs = new AltitudeObservation(
 							dObsUri,
-							ObservationType.strToObsType(prop),		
+							prop,		
 							foi.getURI(),							
 							sens.getURI(),
 							res.getURI(),
@@ -228,12 +231,6 @@ public class EdSensorAssessor {
 			}
 			System.out.println(i+1 + ". Added " + obs.id + " to arraylist");
 			derivedObs.add(assessment);
-			
-			if(count == 27)
-			{
-				System.out.println("All derived observations downloaded");
-				return derivedObs;
-			}
 		}
 		return derivedObs;
 	}
@@ -256,11 +253,11 @@ public class EdSensorAssessor {
 		}
 		else
 		{
-			reasoner = new Reasoner(this.qualityRules, "TTL", false);
+			/*reasoner = new Reasoner(this.qualityRules, "TTL", false);
 			results = reasoner.performReasoning(obs);
 			inferredTriples += results.ntriples.size();
 			reasoningTime = results.duration;
-			obs.add(results.ntriples);
+			obs.add(results.ntriples);*/
 			
 			reasoner = new Reasoner(this.provQualRules, "TTL", false);
 			results = reasoner.performReasoning(obs);
